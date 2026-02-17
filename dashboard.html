@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Hub | Public Repository</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #00f2ff;
+            --bg-dark: #050505;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-dark);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- FX --- */
+        .star-field { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0; animation: twinkle var(--duration) ease-in-out infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: var(--opacity); transform: scale(1); } }
+        
+        .cursor-glow {
+            position: fixed; width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%);
+            z-index: -1; mix-blend-mode: screen; transition: opacity 0.3s;
+        }
+
+        /* --- HUB CARD --- */
+        .hub-card {
+            position: relative; width: 90%; max-width: 1000px; height: 80vh;
+            background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(25px);
+            border: 1px solid var(--border); border-radius: 8px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column;
+        }
+
+        .hub-header {
+            padding: 25px 40px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .hub-title h1 { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 24px; color: #fff; text-transform: uppercase; }
+        .hub-title span { color: var(--primary); font-size: 14px; letter-spacing: 1px; }
+
+        .auth-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff;
+            padding: 6px 16px; border-radius: 4px; cursor: pointer; font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase; text-decoration: none; transition: 0.3s; font-size: 14px;
+        }
+        .auth-btn:hover { background: #fff; color: #000; }
+
+        /* GRID */
+        .projects-container { flex: 1; padding: 40px; overflow-y: auto; }
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+        /* CARD DO PROJETO */
+        .project-module {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            padding: 20px; border-radius: 6px; position: relative;
+            display: flex; flex-direction: column; height: 180px;
+            text-decoration: none; transition: 0.3s;
+        }
+        .project-module:hover { background: rgba(255,255,255,0.05); transform: translateY(-5px); border-color: var(--primary); }
+        
+        .module-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .module-id { font-family: 'Rajdhani', sans-serif; color: rgba(255,255,255,0.3); font-size: 12px; }
+        .module-icon { font-size: 24px; color: var(--primary); }
+        
+        .module-title { color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        .module-desc { color: rgba(255,255,255,0.5); font-size: 12px; line-height: 1.4; flex-grow: 1; overflow: hidden; }
+        
+        .loading { color: white; text-align: center; font-family: 'Rajdhani', sans-serif; margin-top: 50px; font-size: 20px; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <div class="star-field" id="starField"></div>
+
+    <div class="hub-card">
+        <div class="hub-header">
+            <div class="hub-title">
+                <h1>Command Hub</h1>
+                <span>// Public Repository</span>
+            </div>
+            <a href="admin.html" class="auth-btn">Admin Login</a>
+        </div>
+
+        <div class="projects-container">
+            <div class="grid-layout" id="projectGrid">
+                <div class="loading">CONNECTING TO SATELLITE...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO ---
+        const USER = 'dovalexyz';
+        const REPO = 'PacksHTMLCSSJS';
+        const BRANCH = 'main';
+
+        // --- FX ---
+        const starField = document.getElementById('starField');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random()*100+'%'; star.style.top = Math.random()*100+'%';
+            star.style.width = Math.random()*2+1+'px'; star.style.height = star.style.width;
+            star.style.setProperty('--duration', (Math.random()*3+2)+'s');
+            star.style.setProperty('--opacity', Math.random());
+            starField.appendChild(star);
+        }
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('cursorGlow');
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+        });
+
+        // --- LÓGICA DE FETCH ---
+        async function loadProjects() {
+            const grid = document.getElementById('projectGrid');
+            
+            try {
+                // 1. Pega a lista de arquivos do GitHub API
+                const filesResponse = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents`);
+                const files = await filesResponse.json();
+
+                // 2. Tenta pegar o JSON de metadados (se existir)
+                let metadata = [];
+                try {
+                    const metaResponse = await fetch(`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/projects.json`);
+                    if(metaResponse.ok) metadata = await metaResponse.json();
+                } catch(e) { console.log('Sem metadados ainda'); }
+
+                grid.innerHTML = ''; // Limpa loading
+
+                // 3. Filtra só HTMLs e cria os cards
+                files.filter(f => f.name.endsWith('.html')).forEach(file => {
+                    // Procura dados personalizados ou usa padrão
+                    const meta = metadata.find(m => m.filename === file.name) || {};
+                    
+                    const title = meta.title || file.name.replace('.html', '');
+                    const desc = meta.description || 'Raw HTML File from Repository';
+                    const icon = meta.icon || '📄';
+                    
+                    // Link para o arquivo visualizado no GitHub Pages ou Raw
+                    // Assumindo que você ative o GitHub Pages no repo do PacksHTMLCSSJS
+                    const url = `https://${USER}.github.io/${REPO}/${file.name}`;
+
+                    const card = `
+                        <a href="${url}" target="_blank" class="project-module">
+                            <div class="module-header">
+                                <span class="module-id">HTML</span>
+                                <div class="module-icon">${icon}</div>
+                            </div>
+                            <h3 class="module-title">${title}</h3>
+                            <p class="module-desc">${desc}</p>
+                        </a>
+                    `;
+                    grid.innerHTML += card;
+                });
+
+            } catch (error) {
+                grid.innerHTML = `<div class="loading" style="color:red">CONNECTION FAILED: ${error.message}</div>`;
+            }
+        }
+
+        loadProjects();
+    </script>
+</body>
+</html>
