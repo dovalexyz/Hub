@@ -62,7 +62,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // SUA CONFIGURAÇÃO REAL DO FIREBASE
+        // SUA CONFIGURAÇÃO DO FIREBASE (Já atualizada com a sua)
         const firebaseConfig = {
           apiKey: "AIzaSyCcvCjQmGCU-8XIalj7lCl-EshgKbBwT-w",
           authDomain: "hub-admin-dovale.firebaseapp.com",
@@ -77,6 +77,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // CONFIG GITHUB
         const GITHUB_USER = 'dovalexyz';
         const GITHUB_REPO = 'PacksHTMLCSSJS';
         let GITHUB_TOKEN = null;
@@ -85,6 +86,16 @@
         let currentMetadata = [];
         let selectedFile = null;
         let metadataSha = null;
+
+        // --- FUNÇÃO PARA CONVERTER EMOJIS/ACENTOS PARA BASE64 SEM QUEBRAR ---
+        function utf8_to_b64(str) {
+            return window.btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function b64_to_utf8(str) {
+            return decodeURIComponent(escape(window.atob(str)));
+        }
+        // ------------------------------------------------------------------
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -110,7 +121,7 @@
                 }
             } catch (error) {
                 console.error("Error getting token:", error);
-                alert("Database Permission Error. Check Console.");
+                alert("Database Permission Error. Check Console (F12).");
             }
         }
 
@@ -125,9 +136,13 @@
                 const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`, {
                     headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
                 });
+                if(!res.ok) throw new Error("Failed to fetch files. Check Token scope.");
                 const data = await res.json();
                 currentFiles = data.filter(f => f.name.endsWith('.html'));
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                alert("Error connecting to GitHub. Check Console.");
+            }
         }
 
         async function fetchMetadata() {
@@ -138,9 +153,15 @@
                 if(res.ok) {
                     const data = await res.json();
                     metadataSha = data.sha;
-                    currentMetadata = JSON.parse(atob(data.content));
+                    // Usa a nova função de decode para não quebrar com emojis antigos
+                    try {
+                        currentMetadata = JSON.parse(b64_to_utf8(data.content));
+                    } catch(err) {
+                        // Fallback se o arquivo antigo não estava em utf8
+                        currentMetadata = JSON.parse(atob(data.content));
+                    }
                 }
-            } catch(e) { console.log('No metadata yet'); }
+            } catch(e) { console.log('No metadata yet or parse error'); }
         }
 
         function renderList() {
@@ -170,37 +191,56 @@
 
         window.saveChanges = async function() {
             const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerText;
             btn.innerText = 'UPLOADING...';
+            btn.disabled = true;
             
-            const newMeta = {
-                filename: selectedFile,
-                title: document.getElementById('metaTitle').value,
-                icon: document.getElementById('metaIcon').value,
-                description: document.getElementById('metaDesc').value
-            };
-
-            currentMetadata = currentMetadata.filter(m => m.filename !== selectedFile);
-            currentMetadata.push(newMeta);
-            const content = btoa(JSON.stringify(currentMetadata, null, 2));
-            const body = { message: `Update metadata for ${selectedFile}`, content: content, sha: metadataSha };
-
             try {
+                const newMeta = {
+                    filename: selectedFile,
+                    title: document.getElementById('metaTitle').value,
+                    icon: document.getElementById('metaIcon').value,
+                    description: document.getElementById('metaDesc').value
+                };
+
+                // Remove antigo e adiciona novo
+                currentMetadata = currentMetadata.filter(m => m.filename !== selectedFile);
+                currentMetadata.push(newMeta);
+
+                // CONVERTE COM SUPORTE A EMOJI/PT-BR
+                const content = utf8_to_b64(JSON.stringify(currentMetadata, null, 2));
+
+                const body = { 
+                    message: `Update metadata for ${selectedFile}`, 
+                    content: content, 
+                    sha: metadataSha 
+                };
+
                 const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/projects.json`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`, 
+                        'Content-Type': 'application/json' 
+                    },
                     body: JSON.stringify(body)
                 });
 
                 if(res.ok) {
                     const data = await res.json();
-                    metadataSha = data.content.sha;
-                    alert('UPDATED SUCCESSFULLY');
+                    metadataSha = data.content.sha; // Atualiza SHA para permitir novas edições sem recarregar
+                    alert('✅ UPDATED SUCCESSFULLY!');
                 } else {
                     const err = await res.json();
-                    alert('ERROR: ' + err.message);
+                    console.error("GitHub Error:", err);
+                    alert('❌ GITHUB ERROR: ' + (err.message || "Unknown error"));
                 }
-            } catch(e) { alert('NETWORK ERROR'); }
-            btn.innerText = 'PUSH UPDATE';
+            } catch(e) { 
+                console.error(e);
+                alert('❌ NETWORK/CODE ERROR: ' + e.message); 
+            }
+            
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
 
         window.logout = function() {
