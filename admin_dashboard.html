@@ -8,10 +8,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Poppins:wght@300;400;600&display=swap');
 
         :root {
-            --admin: #ff0055; /* Vermelho Admin */
+            --admin: #ff0055;
             --bg-dark: #050505;
             --border: rgba(255, 255, 255, 0.1);
-            --glass: rgba(20, 0, 5, 0.9);
+            --glass: rgba(20, 0, 5, 0.95);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,7 +34,7 @@
         
         .brand { color: var(--admin); font-family: 'Rajdhani'; font-size: 24px; font-weight: bold; margin-bottom: 30px; letter-spacing: 2px; }
         
-        .file-list { flex: 1; overflow-y: auto; }
+        .file-list { flex: 1; overflow-y: auto; margin-top: 20px; }
         .file-item {
             padding: 12px; border-bottom: 1px solid var(--border);
             color: rgba(255,255,255,0.7); cursor: pointer; transition: 0.2s;
@@ -48,16 +48,25 @@
         .main-content {
             flex: 1; padding: 40px; position: relative;
             background: radial-gradient(circle at 50% 50%, rgba(255,0,85,0.05), transparent 70%);
+            display: flex; justify-content: center; align-items: center;
         }
 
         .editor-card {
-            max-width: 600px; margin: 0 auto;
+            width: 100%; max-width: 600px;
             background: var(--glass); border: 1px solid var(--admin);
             padding: 40px; border-radius: 8px;
             box-shadow: 0 0 50px rgba(255,0,85,0.1);
-            display: none; /* Escondido até selecionar arquivo */
+            display: none;
         }
         .editor-card.visible { display: block; animation: fadeIn 0.5s; }
+
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 999; display: flex;
+            justify-content: center; align-items: center; flex-direction: column;
+            color: var(--admin); font-family: 'Rajdhani'; font-size: 20px; letter-spacing: 2px;
+        }
+        .loading-overlay.hidden { display: none; }
 
         h2 { color: #fff; font-family: 'Rajdhani'; margin-bottom: 20px; text-transform: uppercase; }
         
@@ -76,49 +85,37 @@
         }
         .btn-save:hover { box-shadow: 0 0 20px var(--admin); }
 
-        /* TOKEN MODAL */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .modal-content { background: #111; padding: 40px; border: 1px solid var(--admin); width: 400px; text-align: center; }
-        .modal.hidden { display: none; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="modal" id="tokenModal">
-        <div class="modal-content">
-            <h3 style="color:white; margin-bottom:15px">GITHUB AUTH REQUIRED</h3>
-            <p style="color:#777; font-size:12px; margin-bottom:20px">Paste your GitHub Personal Access Token (Classic) with 'repo' scope to edit files.</p>
-            <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width:100%; padding:10px; margin-bottom:10px">
-            <button onclick="saveToken()" class="btn-save">AUTHENTICATE</button>
-        </div>
+    <div class="loading-overlay" id="loadingScreen">
+        <div>AUTHENTICATING...</div>
     </div>
 
     <div class="sidebar">
         <div class="brand">ADMIN :: SYSTEM</div>
+        <div style="font-size: 12px; color: #555" id="adminEmail">...</div>
         <div class="file-list" id="fileList">
-            <div style="padding:20px; color:#555">Fetching repository...</div>
-        </div>
+            </div>
         <button onclick="logout()" style="margin-top:20px; background:transparent; border:1px solid #333; color:#555; padding:10px; cursor:pointer">LOGOUT</button>
     </div>
 
     <div class="main-content">
+        <div style="color: #444; font-family: 'Rajdhani'" id="placeholderMsg">SELECT A MODULE TO EDIT</div>
+
         <div class="editor-card" id="editorPanel">
-            <h2>Edit Project Metadata</h2>
+            <h2>Edit Metadata</h2>
             <p style="color:#777; font-size:12px; margin-bottom:20px">Target: <span id="targetFile" style="color:white">...</span></p>
             
             <div class="input-group">
-                <label>DISPLAY NAME (ON DASHBOARD)</label>
+                <label>DISPLAY NAME</label>
                 <input type="text" id="metaTitle">
             </div>
 
             <div class="input-group">
-                <label>ICON (EMOJI OR TEXT)</label>
+                <label>ICON (EMOJI)</label>
                 <input type="text" id="metaIcon">
             </div>
 
@@ -127,44 +124,71 @@
                 <textarea id="metaDesc" rows="4"></textarea>
             </div>
 
-            <button class="btn-save" onclick="saveChanges()" id="saveBtn">PUSH CHANGES TO GITHUB</button>
+            <button class="btn-save" onclick="saveChanges()" id="saveBtn">PUSH UPDATE</button>
         </div>
     </div>
 
-    <script>
-        const USER = 'dovalexyz';
-        const REPO = 'PacksHTMLCSSJS';
-        const BRANCH = 'main'; // Ajuste se for master
-        let GITHUB_TOKEN = localStorage.getItem('gh_token');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // --- SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO_ID",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // CONFIG GITHUB
+        const GITHUB_USER = 'dovalexyz';
+        const GITHUB_REPO = 'PacksHTMLCSSJS';
+        let GITHUB_TOKEN = null;
+
         let currentFiles = [];
         let currentMetadata = [];
         let selectedFile = null;
-        let metadataSha = null; // Necessário para update no GitHub API
+        let metadataSha = null;
 
-        // --- AUTH ---
-        if(GITHUB_TOKEN) {
-            document.getElementById('tokenModal').classList.add('hidden');
-            initSystem();
-        }
-
-        function saveToken() {
-            const t = document.getElementById('tokenInput').value;
-            if(t.length > 10) {
-                localStorage.setItem('gh_token', t);
-                GITHUB_TOKEN = t;
-                document.getElementById('tokenModal').classList.add('hidden');
-                initSystem();
+        // 1. VERIFICA LOGIN E PEGA TOKEN
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('adminEmail').innerText = user.email;
+                await retrieveToken();
             } else {
-                alert('Invalid Token');
+                window.location.href = "login.html"; // Chuta se não logado
+            }
+        });
+
+        // 2. BUSCA TOKEN NO FIRESTORE
+        async function retrieveToken() {
+            const loading = document.getElementById('loadingScreen');
+            try {
+                // Acessa collection 'system', doc 'secrets'
+                const docRef = doc(db, "system", "secrets");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    GITHUB_TOKEN = docSnap.data().github_token;
+                    loading.classList.add('hidden');
+                    initSystem(); // Inicia o sistema
+                } else {
+                    alert("ERROR: System secrets not found in database.");
+                }
+            } catch (error) {
+                console.error("Error getting token:", error);
+                alert("Database Permission Error. Check Console.");
             }
         }
 
-        function logout() {
-            localStorage.removeItem('gh_token');
-            window.location.reload();
-        }
-
-        // --- CORE LOGIC ---
+        // 3. INICIA SISTEMA (FETCH GITHUB)
         async function initSystem() {
             await fetchFiles();
             await fetchMetadata();
@@ -172,29 +196,24 @@
         }
 
         async function fetchFiles() {
-            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents`, {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`, {
                 headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
             });
-            if(!res.ok) { alert('Auth Failed. Check Token.'); logout(); return; }
             const data = await res.json();
             currentFiles = data.filter(f => f.name.endsWith('.html'));
         }
 
         async function fetchMetadata() {
             try {
-                // Precisamos pegar o SHA e o conteúdo para poder editar
-                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/projects.json`, {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/projects.json`, {
                     headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
                 });
                 if(res.ok) {
                     const data = await res.json();
                     metadataSha = data.sha;
-                    // GitHub retorna base64, precisamos decodificar
                     currentMetadata = JSON.parse(atob(data.content));
-                } else {
-                    currentMetadata = []; // Arquivo não existe ainda
                 }
-            } catch(e) { console.log('Metadata fetch error', e); }
+            } catch(e) { console.log('No metadata yet'); }
         }
 
         function renderList() {
@@ -209,27 +228,26 @@
             });
         }
 
-        function selectFile(filename, element) {
-            // UI
+        window.selectFile = function(filename, element) {
             document.querySelectorAll('.file-item').forEach(d => d.classList.remove('active'));
             element.classList.add('active');
+            
+            document.getElementById('placeholderMsg').style.display = 'none';
             document.getElementById('editorPanel').classList.add('visible');
             
             selectedFile = filename;
             document.getElementById('targetFile').innerText = filename;
 
-            // Preenche dados se existirem no metadata
             const meta = currentMetadata.find(m => m.filename === filename) || {};
             document.getElementById('metaTitle').value = meta.title || filename.replace('.html', '');
             document.getElementById('metaIcon').value = meta.icon || '📄';
             document.getElementById('metaDesc').value = meta.description || '';
         }
 
-        async function saveChanges() {
+        window.saveChanges = async function() {
             const btn = document.getElementById('saveBtn');
             btn.innerText = 'UPLOADING...';
             
-            // 1. Atualiza o array local de metadados
             const newMeta = {
                 filename: selectedFile,
                 title: document.getElementById('metaTitle').value,
@@ -237,22 +255,19 @@
                 description: document.getElementById('metaDesc').value
             };
 
-            // Remove entrada antiga se existir e adiciona nova
             currentMetadata = currentMetadata.filter(m => m.filename !== selectedFile);
             currentMetadata.push(newMeta);
 
-            // 2. Prepara o Payload para GitHub API
-            // Conteúdo tem que ser Base64
             const content = btoa(JSON.stringify(currentMetadata, null, 2));
 
             const body = {
                 message: `Update metadata for ${selectedFile}`,
                 content: content,
-                sha: metadataSha // Se for undefined, cria novo arquivo. Se tiver SHA, atualiza.
+                sha: metadataSha
             };
 
             try {
-                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/projects.json`, {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/projects.json`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -263,16 +278,18 @@
 
                 if(res.ok) {
                     const data = await res.json();
-                    metadataSha = data.content.sha; // Atualiza o SHA para próxima edição
+                    metadataSha = data.content.sha;
                     alert('UPDATED SUCCESSFULLY');
                 } else {
                     const err = await res.json();
                     alert('ERROR: ' + err.message);
                 }
-            } catch(e) {
-                alert('NETWORK ERROR');
-            }
-            btn.innerText = 'PUSH CHANGES TO GITHUB';
+            } catch(e) { alert('NETWORK ERROR'); }
+            btn.innerText = 'PUSH UPDATE';
+        }
+
+        window.logout = function() {
+            signOut(auth).then(() => window.location.href = "login.html");
         }
     </script>
 </body>
