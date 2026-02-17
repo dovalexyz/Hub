@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +8,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap');
 
         :root {
-            --primary: #ff0040; /* Vermelho Carmesim */
-            --primary-dim: rgba(255, 0, 64, 0.1);
+            --primary: #00F2FF; /* Ciano Neon */
+            --primary-dim: rgba(0, 242, 255, 0.1);
             --bg-dark: #050505;
-            --glass: rgba(10, 10, 15, 0.7);
+            --glass: rgba(10, 15, 20, 0.7);
             --border: rgba(255, 255, 255, 0.1);
             --text-main: #fff;
         }
@@ -26,169 +26,118 @@
             color: var(--text-main);
         }
 
-        /* --- BACKGROUND 3D --- */
+        /* --- BACKGROUND 3D CIANO --- */
         .cyber-world {
             position: fixed; width: 100vw; height: 100vh;
             perspective: 800px;
-            overflow: hidden;
-            z-index: -1;
-            background: radial-gradient(circle at center, #150505 0%, #000 100%);
+            overflow: hidden; z-index: -1;
+            background: radial-gradient(circle at center, #051515 0%, #000 100%);
         }
 
         .cyber-floor {
-            position: absolute;
-            bottom: -30%; left: -50%;
-            width: 200%; height: 100%;
-            background-image: 
-                linear-gradient(var(--primary-dim) 1px, transparent 1px),
-                linear-gradient(90deg, var(--primary-dim) 1px, transparent 1px);
+            position: absolute; bottom: -30%; left: -50%; width: 200%; height: 100%;
+            background-image: linear-gradient(var(--primary-dim) 1px, transparent 1px), linear-gradient(90deg, var(--primary-dim) 1px, transparent 1px);
             background-size: 60px 60px;
             transform: rotateX(60deg);
             animation: floorMove 6s linear infinite;
             mask-image: linear-gradient(to top, #000 10%, transparent 90%);
             -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
         }
-
         @keyframes floorMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
 
-        .particle {
-            position: absolute; background: var(--primary);
-            width: 2px; height: 2px; border-radius: 50%;
-            animation: floatUp var(--speed) linear infinite;
-            opacity: 0.4;
-        }
-        @keyframes floatUp {
-            from { transform: translateY(100vh); opacity: 0; }
-            50% { opacity: 0.6; }
-            to { transform: translateY(-10vh); opacity: 0; }
-        }
-
-        /* --- LAYOUT --- */
+        /* --- CONTAINER --- */
         .container {
-            max-width: 1200px; margin: 0 auto;
-            padding: 40px 20px;
+            max-width: 1400px; margin: 0 auto; padding: 40px 20px;
             position: relative; z-index: 10;
         }
 
         /* HEADER */
         .header {
             display: flex; justify-content: space-between; align-items: flex-end;
-            margin-bottom: 60px; padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            animation: fadeInDown 1s ease-out;
+            margin-bottom: 60px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
             flex-wrap: wrap; gap: 20px;
         }
 
         .brand h1 {
-            font-family: 'Cinzel', serif; font-size: 42px; font-weight: 700;
-            color: #fff; text-shadow: 0 0 20px var(--primary);
-            line-height: 1;
+            font-family: 'Cinzel', serif; font-size: 42px; font-weight: 700; color: #fff;
+            text-shadow: 0 0 20px var(--primary); line-height: 1;
         }
         .brand span {
-            font-family: 'Share Tech Mono', monospace; font-size: 14px;
-            color: var(--primary); letter-spacing: 4px; display: block; margin-top: 5px;
+            font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--primary);
+            letter-spacing: 4px; display: block; margin-top: 5px;
         }
 
-        /* BOTOES DO HEADER */
-        .header-actions {
-            display: flex; gap: 15px;
-        }
-
+        .header-actions { display: flex; gap: 15px; }
         .nav-btn {
-            text-decoration: none; color: rgba(255,255,255,0.6);
-            font-family: 'Share Tech Mono', monospace;
+            text-decoration: none; color: rgba(255,255,255,0.7); font-family: 'Share Tech Mono';
             font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
-            border: 1px solid var(--border); padding: 10px 20px;
-            transition: 0.3s;
-            position: relative; overflow: hidden;
+            border: 1px solid var(--border); padding: 10px 20px; transition: 0.3s;
             background: rgba(0,0,0,0.3);
-            display: flex; align-items: center; gap: 8px;
         }
+        .nav-btn:hover { color: #000; background: var(--primary); border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        .nav-btn:hover {
-            color: #fff; border-color: var(--primary);
-            background: rgba(255,0,64,0.1);
-            box-shadow: 0 0 15px var(--primary-dim);
-        }
-
-        .nav-btn svg { width: 14px; fill: currentColor; }
-
-        /* GRID DE PROJETOS */
+        /* GRID */
         .grid-layout {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
         }
 
-        /* CARD STYLE */
+        /* CARD */
         .project-card {
-            background: rgba(15, 15, 20, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 30px;
-            text-decoration: none;
-            position: relative; overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; flex-direction: column;
-            animation: fadeInUp 0.5s ease-out forwards;
-            opacity: 0; transform: translateY(20px);
-        }
-
-        .project-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--primary); transform: scaleX(0); transform-origin: left; transition: 0.4s;
-        }
-        .project-card::after {
-            content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
-            border-bottom: 2px solid var(--primary); border-right: 2px solid var(--primary);
-            opacity: 0; transition: 0.4s;
+            background: rgba(15, 20, 25, 0.6); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 25px; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; height: 350px;
+            transition: 0.4s;
+            animation: fadeInUp 0.5s ease-out forwards; opacity: 0;
         }
 
         .project-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 0, 64, 0.05);
-            border-color: rgba(255, 0, 64, 0.3);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateY(-10px); border-color: var(--primary);
+            box-shadow: 0 10px 40px rgba(0, 242, 255, 0.15);
         }
-        .project-card:hover::before { transform: scaleX(1); }
-        .project-card:hover::after { opacity: 1; }
 
-        .card-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 20px;
-        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .card-icon { font-size: 40px; filter: drop-shadow(0 0 5px var(--primary)); }
         
-        .card-icon { font-size: 32px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
-        .card-id { font-family: 'Share Tech Mono'; color: var(--primary); font-size: 10px; opacity: 0.7; border: 1px solid var(--primary); padding: 2px 6px; }
-
         .card-title {
-            color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700;
-            margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
+            font-family: 'Rajdhani'; font-size: 24px; font-weight: 700; color: #fff;
+            margin-bottom: 10px; text-transform: uppercase;
         }
-        
         .card-desc {
-            color: #888; font-size: 13px; line-height: 1.5; flex: 1;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins'; font-size: 13px; color: #aaa; line-height: 1.5;
+            flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
         }
 
-        .card-footer {
-            margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);
-            color: var(--primary); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-            display: flex; align-items: center; gap: 10px; opacity: 0.7; transition: 0.3s;
+        /* TAGS */
+        .tags-container {
+            display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0;
         }
-        .project-card:hover .card-footer { opacity: 1; gap: 15px; }
+        .tag {
+            font-family: 'Share Tech Mono'; font-size: 10px; color: var(--primary);
+            border: 1px solid var(--primary); padding: 2px 8px; border-radius: 20px;
+            background: rgba(0, 242, 255, 0.05);
+        }
 
-        /* LOADING */
-        .loading-text {
-            text-align: center; width: 100%; color: var(--primary);
-            font-family: 'Share Tech Mono'; letter-spacing: 3px;
-            animation: pulse 1s infinite;
+        /* FOOTER ACTIONS */
+        .card-actions {
+            display: flex; gap: 10px; margin-top: auto;
         }
+        .btn-card {
+            flex: 1; text-align: center; padding: 10px; text-decoration: none;
+            font-family: 'Rajdhani'; font-weight: bold; font-size: 14px; text-transform: uppercase;
+            border: 1px solid var(--border); color: #fff; transition: 0.3s;
+        }
+        .btn-card:hover { background: #fff; color: #000; }
+        .btn-primary { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+        .btn-primary:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
 
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; align-items: center; text-align: center; }
+            .grid-layout { grid-template-columns: 1fr; }
+        }
 
     </style>
 </head>
@@ -196,7 +145,6 @@
 
     <div class="cyber-world">
         <div class="cyber-floor"></div>
-        <div id="particles"></div>
     </div>
 
     <div class="container">
@@ -205,20 +153,16 @@
                 <h1>DUVALLE</h1>
                 <span>DELUXE // PUBLIC REPOSITORY</span>
             </div>
-            
             <div class="header-actions">
-                <a href="https://github.com/dovalexyz/PacksHTMLCSSJS" target="_blank" class="nav-btn">
-                    <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                    Source Code
-                </a>
-                <a href="admin.html" class="nav-btn">
-                    System Login
-                </a>
+                <a href="https://github.com/dovalexyz/PacksHTMLCSSJS" target="_blank" class="nav-btn">GITHUB REPO</a>
+                <a href="admin.html" class="nav-btn">ADMIN ACCESS</a>
             </div>
         </header>
 
         <div class="grid-layout" id="projectGrid">
-            <div class="loading-text">ESTABLISHING CONNECTION...</div>
+            <div style="color:var(--primary); font-family:'Share Tech Mono'; width:100%; text-align:center;">
+                INITIALIZING NETWORK CONNECTION...
+            </div>
         </div>
     </div>
 
@@ -226,67 +170,69 @@
         const USER = 'dovalexyz';
         const REPO = 'PacksHTMLCSSJS';
 
-        // Partículas Background
-        const pContainer = document.getElementById('particles');
-        for(let i=0; i<40; i++) {
-            let p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.setProperty('--speed', (Math.random() * 5 + 5) + 's');
-            pContainer.appendChild(p);
-        }
-
-        // Função Decode
         function b64_to_utf8(str) {
             try { return decodeURIComponent(escape(window.atob(str))); }
             catch(e) { return window.atob(str); }
         }
 
-        // Fetch Anti-Cache
         async function loadProjects() {
             const grid = document.getElementById('projectGrid');
             try {
                 const timeHack = new Date().getTime();
                 
-                const filesResponse = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents?t=${timeHack}`);
-                const files = await filesResponse.json();
+                // Fetch lista de arquivos e metadata
+                const [filesResponse, metaResponse] = await Promise.all([
+                    fetch(`https://api.github.com/repos/${USER}/${REPO}/contents?t=${timeHack}`),
+                    fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/projects.json?t=${timeHack}`)
+                ]);
 
+                const files = await filesResponse.json();
                 let metadata = [];
-                try {
-                    const metaResponse = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/projects.json?t=${timeHack}`);
-                    if(metaResponse.ok) {
-                        const metaData = await metaResponse.json();
-                        const content = b64_to_utf8(metaData.content);
-                        metadata = JSON.parse(content);
-                    }
-                } catch(e) { console.log('Metadata missing'); }
+                
+                if(metaResponse.ok) {
+                    const metaData = await metaResponse.json();
+                    metadata = JSON.parse(b64_to_utf8(metaData.content));
+                }
 
                 grid.innerHTML = '';
-
                 let delay = 0;
+
                 files.filter(f => f.name.endsWith('.html')).forEach(file => {
                     const meta = metadata.find(m => m.filename === file.name) || {};
                     const title = meta.title || file.name.replace('.html', '');
-                    const desc = meta.description || 'System module ready for deployment.';
+                    const desc = meta.description || 'Interactive web module.';
                     const icon = meta.icon || '💠';
                     
-                    const url = `https://${USER}.github.io/${REPO}/${file.name}`;
+                    // Tratamento de Tags
+                    let tagsHtml = '';
+                    if(meta.tags && Array.isArray(meta.tags)) {
+                        meta.tags.forEach(tag => tagsHtml += `<span class="tag">${tag}</span>`);
+                    } else {
+                        tagsHtml = `<span class="tag">HTML</span><span class="tag">WEB</span>`;
+                    }
 
-                    const card = document.createElement('a');
-                    card.href = url;
-                    card.target = "_blank";
+                    // Links
+                    const previewUrl = `https://${USER}.github.io/${REPO}/${file.name}`;
+                    const sourceUrl = `https://github.com/${USER}/${REPO}/blob/main/${file.name}`;
+
+                    const card = document.createElement('div');
                     card.className = "project-card";
                     card.style.animationDelay = `${delay}s`;
                     
                     card.innerHTML = `
                         <div class="card-header">
                             <div class="card-icon">${icon}</div>
-                            <span class="card-id">HTML</span>
                         </div>
                         <h3 class="card-title">${title}</h3>
                         <p class="card-desc">${desc}</p>
-                        <div class="card-footer">
-                            Initialize Module <span>→</span>
+                        
+                        <div class="tags-container">
+                            ${tagsHtml}
+                        </div>
+
+                        <div class="card-actions">
+                            <a href="${sourceUrl}" target="_blank" class="btn-card">Code</a>
+                            <a href="${previewUrl}" target="_blank" class="btn-card btn-primary">Preview</a>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -294,7 +240,7 @@
                 });
 
             } catch (error) {
-                grid.innerHTML = `<div class="loading-text" style="color:#ff0040">CONNECTION LOST: ${error.message}</div>`;
+                grid.innerHTML = `<div style="color:red; text-align:center">CONNECTION FAILURE: ${error.message}</div>`;
             }
         }
 
