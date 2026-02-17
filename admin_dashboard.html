@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN CONSOLE | Project Manager</title>
+    <title>ADMIN CONSOLE | DEBUG MODE</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Poppins:wght@300;400;600&display=swap');
         :root { --admin: #ff0055; --bg-dark: #050505; --border: rgba(255, 255, 255, 0.1); --glass: rgba(20, 0, 5, 0.95); }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { min-height: 100vh; background: var(--bg-dark); font-family: 'Poppins', sans-serif; display: flex; overflow: hidden; }
+        
         .sidebar { width: 300px; background: rgba(10,10,10,0.95); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 10; }
         .brand { color: var(--admin); font-family: 'Rajdhani'; font-size: 24px; font-weight: bold; margin-bottom: 30px; letter-spacing: 2px; }
         .file-list { flex: 1; overflow-y: auto; margin-top: 20px; }
@@ -16,36 +17,53 @@
         .file-item:hover, .file-item.active { background: rgba(255, 0, 85, 0.1); color: #fff; border-left: 3px solid var(--admin); }
         .file-status { width: 8px; height: 8px; border-radius: 50%; background: #333; }
         .file-item.active .file-status { background: var(--admin); box-shadow: 0 0 10px var(--admin); }
-        .main-content { flex: 1; padding: 40px; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255,0,85,0.05), transparent 70%); display: flex; justify-content: center; align-items: center; }
+        
+        .main-content { flex: 1; padding: 40px; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255,0,85,0.05), transparent 70%); display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        
         .editor-card { width: 100%; max-width: 600px; background: var(--glass); border: 1px solid var(--admin); padding: 40px; border-radius: 8px; box-shadow: 0 0 50px rgba(255,0,85,0.1); display: none; }
         .editor-card.visible { display: block; animation: fadeIn 0.5s; }
+        
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--admin); font-family: 'Rajdhani'; font-size: 20px; letter-spacing: 2px; }
         .loading-overlay.hidden { display: none; }
+        
         h2 { color: #fff; font-family: 'Rajdhani'; margin-bottom: 20px; text-transform: uppercase; }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; color: var(--admin); font-size: 12px; margin-bottom: 5px; font-weight: bold; }
         .input-group input, .input-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px; color: #fff; border-radius: 4px; font-family: 'Poppins'; }
         .input-group input:focus { border-color: var(--admin); outline: none; }
+        
         .btn-save { width: 100%; padding: 12px; background: var(--admin); color: #fff; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
         .btn-save:hover { box-shadow: 0 0 20px var(--admin); }
+        .btn-save:disabled { background: #555; cursor: not-allowed; }
+
+        /* DEBUG CONSOLE */
+        .debug-console {
+            position: fixed; bottom: 0; left: 300px; right: 0; height: 150px;
+            background: #000; border-top: 1px solid var(--admin);
+            color: #0f0; font-family: monospace; font-size: 12px;
+            padding: 10px; overflow-y: auto; z-index: 100; opacity: 0.9;
+        }
+        .log-error { color: #ff0055; font-weight: bold; }
+        .log-success { color: #00ff88; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="loading-overlay" id="loadingScreen">
-        <div>AUTHENTICATING...</div>
+        <div>INITIALIZING SYSTEM...</div>
     </div>
 
     <div class="sidebar">
-        <div class="brand">ADMIN :: SYSTEM</div>
+        <div class="brand">ADMIN :: DEBUG</div>
         <div style="font-size: 12px; color: #555" id="adminEmail">...</div>
         <div class="file-list" id="fileList"></div>
         <button onclick="logout()" style="margin-top:20px; background:transparent; border:1px solid #333; color:#555; padding:10px; cursor:pointer">LOGOUT</button>
     </div>
 
     <div class="main-content">
-        <div style="color: #444; font-family: 'Rajdhani'" id="placeholderMsg">SELECT A MODULE TO EDIT</div>
+        <div style="color: #444; font-family: 'Rajdhani'" id="placeholderMsg">SELECT A MODULE</div>
 
         <div class="editor-card" id="editorPanel">
             <h2>Edit Metadata</h2>
@@ -57,12 +75,29 @@
         </div>
     </div>
 
+    <div class="debug-console" id="debugConsole">
+        <div>> System Ready. Logs will appear here...</div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // SUA CONFIGURAÇÃO DO FIREBASE (Já atualizada com a sua)
+        // --- SISTEMA DE LOG VISUAL ---
+        function log(msg, type = 'info') {
+            const consoleDiv = document.getElementById('debugConsole');
+            const entry = document.createElement('div');
+            const time = new Date().toLocaleTimeString();
+            entry.innerText = `[${time}] ${msg}`;
+            if(type === 'error') entry.className = 'log-error';
+            if(type === 'success') entry.className = 'log-success';
+            consoleDiv.appendChild(entry);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            console.log(msg); // Também joga no console do navegador
+        }
+
+        // --- CONFIGURAÇÃO FIREBASE ---
         const firebaseConfig = {
           apiKey: "AIzaSyCcvCjQmGCU-8XIalj7lCl-EshgKbBwT-w",
           authDomain: "hub-admin-dovale.firebaseapp.com",
@@ -77,7 +112,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // CONFIG GITHUB
+        // --- CONFIG GITHUB ---
         const GITHUB_USER = 'dovalexyz';
         const GITHUB_REPO = 'PacksHTMLCSSJS';
         let GITHUB_TOKEN = null;
@@ -87,81 +122,96 @@
         let selectedFile = null;
         let metadataSha = null;
 
-        // --- FUNÇÃO PARA CONVERTER EMOJIS/ACENTOS PARA BASE64 SEM QUEBRAR ---
-        function utf8_to_b64(str) {
-            return window.btoa(unescape(encodeURIComponent(str)));
-        }
+        // Utilitários de Base64 Seguro
+        function utf8_to_b64(str) { return window.btoa(unescape(encodeURIComponent(str))); }
+        function b64_to_utf8(str) { return decodeURIComponent(escape(window.atob(str))); }
 
-        function b64_to_utf8(str) {
-            return decodeURIComponent(escape(window.atob(str)));
-        }
-        // ------------------------------------------------------------------
-
+        // 1. LOGIN
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('adminEmail').innerText = user.email;
+                log(`Logged in as: ${user.email}`);
                 await retrieveToken();
             } else {
                 window.location.href = "admin.html";
             }
         });
 
+        // 2. RECUPERAR TOKEN
         async function retrieveToken() {
-            const loading = document.getElementById('loadingScreen');
             try {
+                log('Fetching Token from Firestore...');
                 const docRef = doc(db, "system", "secrets");
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    GITHUB_TOKEN = docSnap.data().github_token;
-                    loading.classList.add('hidden');
+                    // .trim() remove espaços em branco que causam erro 401
+                    GITHUB_TOKEN = docSnap.data().github_token.trim(); 
+                    log('Token retrieved successfully.');
+                    document.getElementById('loadingScreen').classList.add('hidden');
                     initSystem();
                 } else {
-                    alert("ERROR: System secrets not found in database.");
+                    log('ERROR: "secrets" document not found in Firestore.', 'error');
+                    alert("DATABASE ERROR: Check logs below.");
                 }
             } catch (error) {
-                console.error("Error getting token:", error);
-                alert("Database Permission Error. Check Console (F12).");
+                log(`FIRESTORE ERROR: ${error.message}`, 'error');
             }
         }
 
+        // 3. INICIALIZAÇÃO
         async function initSystem() {
+            log(`Connecting to GitHub Repo: ${GITHUB_USER}/${GITHUB_REPO}...`);
             await fetchFiles();
             await fetchMetadata();
             renderList();
         }
 
+        // 4. LISTAR ARQUIVOS
         async function fetchFiles() {
             try {
                 const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`, {
                     headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
                 });
-                if(!res.ok) throw new Error("Failed to fetch files. Check Token scope.");
+                
+                if(!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`GitHub API Error (${res.status}): ${errText}`);
+                }
+
                 const data = await res.json();
                 currentFiles = data.filter(f => f.name.endsWith('.html'));
+                log(`Found ${currentFiles.length} HTML files.`);
             } catch (e) { 
-                console.error(e);
-                alert("Error connecting to GitHub. Check Console.");
+                log(`FETCH FILES FAILED: ${e.message}`, 'error');
             }
         }
 
+        // 5. BAIXAR METADADOS EXISTENTES
         async function fetchMetadata() {
             try {
+                log('Checking for existing projects.json...');
                 const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/projects.json`, {
                     headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
                 });
+                
                 if(res.ok) {
                     const data = await res.json();
                     metadataSha = data.sha;
-                    // Usa a nova função de decode para não quebrar com emojis antigos
+                    log(`Metadata found. SHA: ${metadataSha}`);
                     try {
                         currentMetadata = JSON.parse(b64_to_utf8(data.content));
                     } catch(err) {
-                        // Fallback se o arquivo antigo não estava em utf8
+                        log('Legacy encoding detected, converting...', 'info');
                         currentMetadata = JSON.parse(atob(data.content));
                     }
+                } else {
+                    log('No projects.json found. Creating new one on first save.', 'info');
+                    metadataSha = null; // Garante que é null se não existe
                 }
-            } catch(e) { console.log('No metadata yet or parse error'); }
+            } catch(e) { 
+                log(`METADATA ERROR: ${e.message}`, 'error');
+            }
         }
 
         function renderList() {
@@ -179,23 +229,31 @@
         window.selectFile = function(filename, element) {
             document.querySelectorAll('.file-item').forEach(d => d.classList.remove('active'));
             element.classList.add('active');
+            
             document.getElementById('placeholderMsg').style.display = 'none';
             document.getElementById('editorPanel').classList.add('visible');
+            
             selectedFile = filename;
             document.getElementById('targetFile').innerText = filename;
+
             const meta = currentMetadata.find(m => m.filename === filename) || {};
             document.getElementById('metaTitle').value = meta.title || filename.replace('.html', '');
             document.getElementById('metaIcon').value = meta.icon || '📄';
             document.getElementById('metaDesc').value = meta.description || '';
+            log(`Selected: ${filename}`);
         }
 
+        // 6. SALVAR (AQUI É ONDE O ERRO OCORRIA)
         window.saveChanges = async function() {
             const btn = document.getElementById('saveBtn');
             const originalText = btn.innerText;
             btn.innerText = 'UPLOADING...';
             btn.disabled = true;
             
+            log(`Starting upload for ${selectedFile}...`);
+
             try {
+                // 1. Monta o novo JSON
                 const newMeta = {
                     filename: selectedFile,
                     title: document.getElementById('metaTitle').value,
@@ -203,19 +261,26 @@
                     description: document.getElementById('metaDesc').value
                 };
 
-                // Remove antigo e adiciona novo
+                // 2. Atualiza array local
                 currentMetadata = currentMetadata.filter(m => m.filename !== selectedFile);
                 currentMetadata.push(newMeta);
 
-                // CONVERTE COM SUPORTE A EMOJI/PT-BR
+                // 3. Prepara Payload
                 const content = utf8_to_b64(JSON.stringify(currentMetadata, null, 2));
 
                 const body = { 
                     message: `Update metadata for ${selectedFile}`, 
-                    content: content, 
-                    sha: metadataSha 
+                    content: content
                 };
 
+                // IMPORTANTE: Só envia o SHA se o arquivo já existir
+                if (metadataSha) {
+                    body.sha = metadataSha;
+                }
+
+                log('Sending Request to GitHub API...');
+
+                // 4. Envia
                 const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/projects.json`, {
                     method: 'PUT',
                     headers: { 
@@ -227,16 +292,18 @@
 
                 if(res.ok) {
                     const data = await res.json();
-                    metadataSha = data.content.sha; // Atualiza SHA para permitir novas edições sem recarregar
-                    alert('✅ UPDATED SUCCESSFULLY!');
+                    metadataSha = data.content.sha; // Atualiza SHA
+                    log('UPLOAD SUCCESSFUL! Metadata saved.', 'success');
+                    alert('✅ SAVED!');
                 } else {
-                    const err = await res.json();
-                    console.error("GitHub Error:", err);
-                    alert('❌ GITHUB ERROR: ' + (err.message || "Unknown error"));
+                    const errData = await res.json();
+                    log(`GITHUB ERROR (${res.status}): ${errData.message}`, 'error');
+                    alert(`ERROR: ${errData.message}`);
                 }
+
             } catch(e) { 
-                console.error(e);
-                alert('❌ NETWORK/CODE ERROR: ' + e.message); 
+                log(`FATAL ERROR: ${e.message}`, 'error');
+                alert('FATAL ERROR. Check log below.');
             }
             
             btn.innerText = originalText;
