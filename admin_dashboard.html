@@ -6,85 +6,28 @@
     <title>ADMIN CONSOLE | Project Manager</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Poppins:wght@300;400;600&display=swap');
-
-        :root {
-            --admin: #ff0055;
-            --bg-dark: #050505;
-            --border: rgba(255, 255, 255, 0.1);
-            --glass: rgba(20, 0, 5, 0.95);
-        }
-
+        :root { --admin: #ff0055; --bg-dark: #050505; --border: rgba(255, 255, 255, 0.1); --glass: rgba(20, 0, 5, 0.95); }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            min-height: 100vh;
-            background: var(--bg-dark);
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 300px; background: rgba(10,10,10,0.95);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            padding: 20px; z-index: 10;
-        }
-        
+        body { min-height: 100vh; background: var(--bg-dark); font-family: 'Poppins', sans-serif; display: flex; overflow: hidden; }
+        .sidebar { width: 300px; background: rgba(10,10,10,0.95); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 10; }
         .brand { color: var(--admin); font-family: 'Rajdhani'; font-size: 24px; font-weight: bold; margin-bottom: 30px; letter-spacing: 2px; }
-        
         .file-list { flex: 1; overflow-y: auto; margin-top: 20px; }
-        .file-item {
-            padding: 12px; border-bottom: 1px solid var(--border);
-            color: rgba(255,255,255,0.7); cursor: pointer; transition: 0.2s;
-            font-size: 14px; display: flex; align-items: center; justify-content: space-between;
-        }
+        .file-item { padding: 12px; border-bottom: 1px solid var(--border); color: rgba(255,255,255,0.7); cursor: pointer; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
         .file-item:hover, .file-item.active { background: rgba(255, 0, 85, 0.1); color: #fff; border-left: 3px solid var(--admin); }
         .file-status { width: 8px; height: 8px; border-radius: 50%; background: #333; }
         .file-item.active .file-status { background: var(--admin); box-shadow: 0 0 10px var(--admin); }
-
-        /* --- MAIN EDITOR --- */
-        .main-content {
-            flex: 1; padding: 40px; position: relative;
-            background: radial-gradient(circle at 50% 50%, rgba(255,0,85,0.05), transparent 70%);
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        .editor-card {
-            width: 100%; max-width: 600px;
-            background: var(--glass); border: 1px solid var(--admin);
-            padding: 40px; border-radius: 8px;
-            box-shadow: 0 0 50px rgba(255,0,85,0.1);
-            display: none;
-        }
+        .main-content { flex: 1; padding: 40px; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255,0,85,0.05), transparent 70%); display: flex; justify-content: center; align-items: center; }
+        .editor-card { width: 100%; max-width: 600px; background: var(--glass); border: 1px solid var(--admin); padding: 40px; border-radius: 8px; box-shadow: 0 0 50px rgba(255,0,85,0.1); display: none; }
         .editor-card.visible { display: block; animation: fadeIn 0.5s; }
-
-        .loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999; display: flex;
-            justify-content: center; align-items: center; flex-direction: column;
-            color: var(--admin); font-family: 'Rajdhani'; font-size: 20px; letter-spacing: 2px;
-        }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--admin); font-family: 'Rajdhani'; font-size: 20px; letter-spacing: 2px; }
         .loading-overlay.hidden { display: none; }
-
         h2 { color: #fff; font-family: 'Rajdhani'; margin-bottom: 20px; text-transform: uppercase; }
-        
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; color: var(--admin); font-size: 12px; margin-bottom: 5px; font-weight: bold; }
-        .input-group input, .input-group textarea {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            padding: 10px; color: #fff; border-radius: 4px; font-family: 'Poppins';
-        }
+        .input-group input, .input-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px; color: #fff; border-radius: 4px; font-family: 'Poppins'; }
         .input-group input:focus { border-color: var(--admin); outline: none; }
-
-        .btn-save {
-            width: 100%; padding: 12px; background: var(--admin); color: #fff; border: none;
-            font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            transition: 0.3s;
-        }
+        .btn-save { width: 100%; padding: 12px; background: var(--admin); color: #fff; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
         .btn-save:hover { box-shadow: 0 0 20px var(--admin); }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -97,8 +40,7 @@
     <div class="sidebar">
         <div class="brand">ADMIN :: SYSTEM</div>
         <div style="font-size: 12px; color: #555" id="adminEmail">...</div>
-        <div class="file-list" id="fileList">
-            </div>
+        <div class="file-list" id="fileList"></div>
         <button onclick="logout()" style="margin-top:20px; background:transparent; border:1px solid #333; color:#555; padding:10px; cursor:pointer">LOGOUT</button>
     </div>
 
@@ -108,22 +50,9 @@
         <div class="editor-card" id="editorPanel">
             <h2>Edit Metadata</h2>
             <p style="color:#777; font-size:12px; margin-bottom:20px">Target: <span id="targetFile" style="color:white">...</span></p>
-            
-            <div class="input-group">
-                <label>DISPLAY NAME</label>
-                <input type="text" id="metaTitle">
-            </div>
-
-            <div class="input-group">
-                <label>ICON (EMOJI)</label>
-                <input type="text" id="metaIcon">
-            </div>
-
-            <div class="input-group">
-                <label>DESCRIPTION</label>
-                <textarea id="metaDesc" rows="4"></textarea>
-            </div>
-
+            <div class="input-group"><label>DISPLAY NAME</label><input type="text" id="metaTitle"></div>
+            <div class="input-group"><label>ICON (EMOJI)</label><input type="text" id="metaIcon"></div>
+            <div class="input-group"><label>DESCRIPTION</label><textarea id="metaDesc" rows="4"></textarea></div>
             <button class="btn-save" onclick="saveChanges()" id="saveBtn">PUSH UPDATE</button>
         </div>
     </div>
@@ -133,21 +62,21 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ---
+        // SUA CONFIGURAÇÃO REAL DO FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyCcvCjQmGCU-8XIalj7lCl-EshgKbBwT-w",
-            authDomain: "hub-admin-dovale.firebaseapp.com",
-            projectId: "hub-admin-dovale",
-            storageBucket: "hub-admin-dovale.firebasestorage.app",
-            messagingSenderId: "520570250135",
-            appId: "1:520570250135:web:d65ba618c0260ddf8d1ad2",
+          apiKey: "AIzaSyCcvCjQmGCU-8XIalj7lCl-EshgKbBwT-w",
+          authDomain: "hub-admin-dovale.firebaseapp.com",
+          projectId: "hub-admin-dovale",
+          storageBucket: "hub-admin-dovale.firebasestorage.app",
+          messagingSenderId: "520570250135",
+          appId: "1:520570250135:web:d65ba618c0260ddf8d1ad2",
+          measurementId: "G-QWFSK5J1S8"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // CONFIG GITHUB
         const GITHUB_USER = 'dovalexyz';
         const GITHUB_REPO = 'PacksHTMLCSSJS';
         let GITHUB_TOKEN = null;
@@ -157,28 +86,25 @@
         let selectedFile = null;
         let metadataSha = null;
 
-        // 1. VERIFICA LOGIN E PEGA TOKEN
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('adminEmail').innerText = user.email;
                 await retrieveToken();
             } else {
-                window.location.href = "login.html"; // Chuta se não logado
+                window.location.href = "admin.html";
             }
         });
 
-        // 2. BUSCA TOKEN NO FIRESTORE
         async function retrieveToken() {
             const loading = document.getElementById('loadingScreen');
             try {
-                // Acessa collection 'system', doc 'secrets'
                 const docRef = doc(db, "system", "secrets");
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     GITHUB_TOKEN = docSnap.data().github_token;
                     loading.classList.add('hidden');
-                    initSystem(); // Inicia o sistema
+                    initSystem();
                 } else {
                     alert("ERROR: System secrets not found in database.");
                 }
@@ -188,7 +114,6 @@
             }
         }
 
-        // 3. INICIA SISTEMA (FETCH GITHUB)
         async function initSystem() {
             await fetchFiles();
             await fetchMetadata();
@@ -196,11 +121,13 @@
         }
 
         async function fetchFiles() {
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`, {
-                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
-            });
-            const data = await res.json();
-            currentFiles = data.filter(f => f.name.endsWith('.html'));
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`, {
+                    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
+                });
+                const data = await res.json();
+                currentFiles = data.filter(f => f.name.endsWith('.html'));
+            } catch (e) { console.error(e); }
         }
 
         async function fetchMetadata() {
@@ -231,13 +158,10 @@
         window.selectFile = function(filename, element) {
             document.querySelectorAll('.file-item').forEach(d => d.classList.remove('active'));
             element.classList.add('active');
-            
             document.getElementById('placeholderMsg').style.display = 'none';
             document.getElementById('editorPanel').classList.add('visible');
-            
             selectedFile = filename;
             document.getElementById('targetFile').innerText = filename;
-
             const meta = currentMetadata.find(m => m.filename === filename) || {};
             document.getElementById('metaTitle').value = meta.title || filename.replace('.html', '');
             document.getElementById('metaIcon').value = meta.icon || '📄';
@@ -257,22 +181,13 @@
 
             currentMetadata = currentMetadata.filter(m => m.filename !== selectedFile);
             currentMetadata.push(newMeta);
-
             const content = btoa(JSON.stringify(currentMetadata, null, 2));
-
-            const body = {
-                message: `Update metadata for ${selectedFile}`,
-                content: content,
-                sha: metadataSha
-            };
+            const body = { message: `Update metadata for ${selectedFile}`, content: content, sha: metadataSha };
 
             try {
                 const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/projects.json`, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
 
@@ -289,7 +204,7 @@
         }
 
         window.logout = function() {
-            signOut(auth).then(() => window.location.href = "login.html");
+            signOut(auth).then(() => window.location.href = "admin.html");
         }
     </script>
 </body>

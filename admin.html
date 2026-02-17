@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Root Access | Admin Console</title>
     <style>
-        /* (MANTIVE O MESMO CSS DO SEU ESTILO VERMELHO) */
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Poppins:wght@300;400;600&display=swap');
         :root { --primary: #ff0055; --bg-dark: #050505; --border: rgba(255, 255, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -48,23 +47,24 @@
     </div>
 
     <script>
-        // FX Script Simplificado
         const starField=document.getElementById('starField');for(let i=0;i<100;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.width=Math.random()*2+1+'px';s.style.height=s.style.width;s.style.setProperty('--duration',(Math.random()*3+2)+'s');s.style.setProperty('--opacity',Math.random());starField.appendChild(s);}
         const cursorGlow=document.getElementById('cursorGlow');document.addEventListener('mousemove',(e)=>{requestAnimationFrame(()=>{cursorGlow.style.left=e.clientX+'px';cursorGlow.style.top=e.clientY+'px';});});
     </script>
 
     <script type="module">
+        // Importando via CDN (O jeito certo para HTML puro)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // --- SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ---
+        // SUA CONFIGURAÇÃO REAL DO FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyCcvCjQmGCU-8XIalj7lCl-EshgKbBwT-w",
-            authDomain: "hub-admin-dovale.firebaseapp.com",
-            projectId: "hub-admin-dovale",
-            storageBucket: "hub-admin-dovale.firebasestorage.app",
-            messagingSenderId: "520570250135",
-            appId: "1:520570250135:web:d65ba618c0260ddf8d1ad2",
+          apiKey: "AIzaSyCcvCjQmGCU-8XIalj7lCl-EshgKbBwT-w",
+          authDomain: "hub-admin-dovale.firebaseapp.com",
+          projectId: "hub-admin-dovale",
+          storageBucket: "hub-admin-dovale.firebasestorage.app",
+          messagingSenderId: "520570250135",
+          appId: "1:520570250135:web:d65ba618c0260ddf8d1ad2",
+          measurementId: "G-QWFSK5J1S8"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -82,7 +82,7 @@
             
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                // REDIRECIONA PARA O ADMIN DASHBOARD AGORA
+                // REDIRECIONA PARA O ADMIN DASHBOARD
                 window.location.href = "admin_dashboard.html";
             } catch (error) {
                 console.error(error);
