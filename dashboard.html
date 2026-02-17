@@ -3,105 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Command Hub | Public Repository</title>
+    <title>DuValle Deluxe | Public Repository</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Poppins:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap');
 
         :root {
-            --primary: #00f2ff;
+            --primary: #ff0040; /* Vermelho Carmesim */
+            --primary-dim: rgba(255, 0, 64, 0.1);
             --bg-dark: #050505;
+            --glass: rgba(10, 10, 15, 0.7);
             --border: rgba(255, 255, 255, 0.1);
+            --text-main: #fff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             min-height: 100vh;
-            background: var(--bg-dark);
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: var(--bg-dark);
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            color: var(--text-main);
+        }
+
+        /* --- BACKGROUND 3D (IGUAL AO ADMIN) --- */
+        .cyber-world {
+            position: fixed; width: 100vw; height: 100vh;
+            perspective: 800px;
             overflow: hidden;
+            z-index: -1;
+            background: radial-gradient(circle at center, #150505 0%, #000 100%);
         }
 
-        /* --- FX --- */
-        .star-field { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; opacity: 0; animation: twinkle var(--duration) ease-in-out infinite; }
-        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: var(--opacity); transform: scale(1); } }
-        
-        .cursor-glow {
-            position: fixed; width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, rgba(0,0,0,0) 70%);
-            border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%);
-            z-index: -1; mix-blend-mode: screen; transition: opacity 0.3s;
+        .cyber-floor {
+            position: absolute;
+            bottom: -30%; left: -50%;
+            width: 200%; height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-dim) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: rotateX(60deg);
+            animation: floorMove 6s linear infinite;
+            mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+            -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
         }
 
-        /* --- HUB CARD --- */
-        .hub-card {
-            position: relative; width: 90%; max-width: 1000px; height: 80vh;
-            background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(25px);
-            border: 1px solid var(--border); border-radius: 8px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+        @keyframes floorMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
+
+        .particle {
+            position: absolute; background: var(--primary);
+            width: 2px; height: 2px; border-radius: 50%;
+            animation: floatUp var(--speed) linear infinite;
+            opacity: 0.4;
+        }
+        @keyframes floatUp {
+            from { transform: translateY(100vh); opacity: 0; }
+            50% { opacity: 0.6; }
+            to { transform: translateY(-10vh); opacity: 0; }
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1200px; margin: 0 auto;
+            padding: 40px 20px;
+            position: relative; z-index: 10;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 60px; padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .brand h1 {
+            font-family: 'Cinzel', serif; font-size: 42px; font-weight: 700;
+            color: #fff; text-shadow: 0 0 20px var(--primary);
+            line-height: 1;
+        }
+        .brand span {
+            font-family: 'Share Tech Mono', monospace; font-size: 14px;
+            color: var(--primary); letter-spacing: 4px; display: block; margin-top: 5px;
+        }
+
+        .admin-link {
+            text-decoration: none; color: rgba(255,255,255,0.5);
+            font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+            border: 1px solid var(--border); padding: 8px 16px;
+            transition: 0.3s;
+        }
+        .admin-link:hover { color: var(--primary); border-color: var(--primary); background: rgba(255,0,64,0.1); }
+
+        /* GRID DE PROJETOS */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* CARD STYLE */
+        .project-card {
+            background: rgba(15, 15, 20, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 30px;
+            text-decoration: none;
+            position: relative; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0; transform: translateY(20px);
         }
 
-        .hub-header {
-            padding: 25px 40px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
+        /* Tech Decoration nos Cards */
+        .project-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--primary); transform: scaleX(0); transform-origin: left; transition: 0.4s;
         }
-        .hub-title h1 { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 24px; color: #fff; text-transform: uppercase; }
-        .hub-title span { color: var(--primary); font-size: 14px; letter-spacing: 1px; }
-
-        .auth-btn {
-            background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff;
-            padding: 6px 16px; border-radius: 4px; cursor: pointer; font-family: 'Rajdhani', sans-serif;
-            text-transform: uppercase; text-decoration: none; transition: 0.3s; font-size: 14px;
+        .project-card::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
+            border-bottom: 2px solid var(--primary); border-right: 2px solid var(--primary);
+            opacity: 0; transition: 0.4s;
         }
-        .auth-btn:hover { background: #fff; color: #000; }
 
-        /* GRID */
-        .projects-container { flex: 1; padding: 40px; overflow-y: auto; }
-        .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-
-        /* CARD DO PROJETO */
-        .project-module {
-            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
-            padding: 20px; border-radius: 6px; position: relative;
-            display: flex; flex-direction: column; height: 180px;
-            text-decoration: none; transition: 0.3s;
+        .project-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 0, 64, 0.05);
+            border-color: rgba(255, 0, 64, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .project-module:hover { background: rgba(255,255,255,0.05); transform: translateY(-5px); border-color: var(--primary); }
+        .project-card:hover::before { transform: scaleX(1); }
+        .project-card:hover::after { opacity: 1; }
+
+        .card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 20px;
+        }
         
-        .module-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .module-id { font-family: 'Rajdhani', sans-serif; color: rgba(255,255,255,0.3); font-size: 12px; }
-        .module-icon { font-size: 24px; color: var(--primary); }
+        .card-icon { font-size: 32px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .card-id { font-family: 'Share Tech Mono'; color: var(--primary); font-size: 10px; opacity: 0.7; border: 1px solid var(--primary); padding: 2px 6px; }
+
+        .card-title {
+            color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700;
+            margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
+        }
         
-        .module-title { color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
-        .module-desc { color: rgba(255,255,255,0.5); font-size: 12px; line-height: 1.4; flex-grow: 1; overflow: hidden; }
-        
-        .loading { color: white; text-align: center; font-family: 'Rajdhani', sans-serif; margin-top: 50px; font-size: 20px; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+        .card-desc {
+            color: #888; font-size: 13px; line-height: 1.5; flex: 1;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .card-footer {
+            margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--primary); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+            display: flex; align-items: center; gap: 10px; opacity: 0.7; transition: 0.3s;
+        }
+        .project-card:hover .card-footer { opacity: 1; gap: 15px; }
+
+        /* LOADING */
+        .loading-text {
+            text-align: center; width: 100%; color: var(--primary);
+            font-family: 'Share Tech Mono'; letter-spacing: 3px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
     </style>
 </head>
 <body>
-    <div class="cursor-glow" id="cursorGlow"></div>
-    <div class="star-field" id="starField"></div>
 
-    <div class="hub-card">
-        <div class="hub-header">
-            <div class="hub-title">
-                <h1>Command Hub</h1>
-                <span>// Public Repository</span>
-            </div>
-            <a href="admin.html" class="auth-btn">Admin Login</a>
-        </div>
+    <div class="cyber-world">
+        <div class="cyber-floor"></div>
+        <div id="particles"></div>
+    </div>
 
-        <div class="projects-container">
-            <div class="grid-layout" id="projectGrid">
-                <div class="loading">CONNECTING TO SATELLITE...</div>
+    <div class="container">
+        <header class="header">
+            <div class="brand">
+                <h1>DUVALLE</h1>
+                <span>DELUXE // PUBLIC REPOSITORY</span>
             </div>
+            <a href="admin.html" class="admin-link">System Login</a>
+        </header>
+
+        <div class="grid-layout" id="projectGrid">
+            <div class="loading-text">ESTABLISHING CONNECTION...</div>
         </div>
     </div>
 
@@ -109,70 +201,89 @@
         // --- CONFIGURAÇÃO ---
         const USER = 'dovalexyz';
         const REPO = 'PacksHTMLCSSJS';
-        const BRANCH = 'main';
 
-        // --- FX ---
-        const starField = document.getElementById('starField');
-        for (let i = 0; i < 100; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random()*100+'%'; star.style.top = Math.random()*100+'%';
-            star.style.width = Math.random()*2+1+'px'; star.style.height = star.style.width;
-            star.style.setProperty('--duration', (Math.random()*3+2)+'s');
-            star.style.setProperty('--opacity', Math.random());
-            starField.appendChild(star);
+        // --- PARTÍCULAS BACKGROUND ---
+        const pContainer = document.getElementById('particles');
+        for(let i=0; i<40; i++) {
+            let p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.setProperty('--speed', (Math.random() * 5 + 5) + 's');
+            pContainer.appendChild(p);
         }
-        document.addEventListener('mousemove', (e) => {
-            const cursor = document.getElementById('cursorGlow');
-            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-        });
 
-        // --- LÓGICA DE FETCH ---
+        // --- FUNÇÃO DE DECODE (Pra ler emojis/acentos do JSON) ---
+        function b64_to_utf8(str) {
+            try {
+                return decodeURIComponent(escape(window.atob(str)));
+            } catch(e) {
+                return window.atob(str); // Fallback
+            }
+        }
+
+        // --- FETCH PROJETOS ---
         async function loadProjects() {
             const grid = document.getElementById('projectGrid');
             
             try {
-                // 1. Pega a lista de arquivos do GitHub API
-                const filesResponse = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents`);
+                // Truque do Timestamp para evitar Cache antigo
+                const timeHack = new Date().getTime();
+                
+                // 1. Pega lista de arquivos
+                const filesResponse = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents?t=${timeHack}`);
                 const files = await filesResponse.json();
 
-                // 2. Tenta pegar o JSON de metadados (se existir)
+                // 2. Pega metadados (JSON)
                 let metadata = [];
                 try {
-                    const metaResponse = await fetch(`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/projects.json`);
-                    if(metaResponse.ok) metadata = await metaResponse.json();
-                } catch(e) { console.log('Sem metadados ainda'); }
+                    const metaResponse = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/projects.json?t=${timeHack}`);
+                    if(metaResponse.ok) {
+                        const metaData = await metaResponse.json();
+                        // Decodifica corretamente para exibir emojis e acentos
+                        const content = b64_to_utf8(metaData.content);
+                        metadata = JSON.parse(content);
+                    }
+                } catch(e) { console.log('Metadata not found'); }
 
-                grid.innerHTML = ''; // Limpa loading
+                // Limpa loading
+                grid.innerHTML = '';
 
-                // 3. Filtra só HTMLs e cria os cards
+                // 3. Renderiza Cards
+                let delay = 0;
                 files.filter(f => f.name.endsWith('.html')).forEach(file => {
-                    // Procura dados personalizados ou usa padrão
+                    // Pega dados do JSON ou usa padrão
                     const meta = metadata.find(m => m.filename === file.name) || {};
-                    
                     const title = meta.title || file.name.replace('.html', '');
-                    const desc = meta.description || 'Raw HTML File from Repository';
-                    const icon = meta.icon || '📄';
+                    const desc = meta.description || 'System module ready for deployment.';
+                    const icon = meta.icon || '💠';
                     
-                    // Link para o arquivo visualizado no GitHub Pages ou Raw
-                    // Assumindo que você ative o GitHub Pages no repo do PacksHTMLCSSJS
+                    // URL do GitHub Pages
                     const url = `https://${USER}.github.io/${REPO}/${file.name}`;
 
-                    const card = `
-                        <a href="${url}" target="_blank" class="project-module">
-                            <div class="module-header">
-                                <span class="module-id">HTML</span>
-                                <div class="module-icon">${icon}</div>
-                            </div>
-                            <h3 class="module-title">${title}</h3>
-                            <p class="module-desc">${desc}</p>
-                        </a>
+                    const card = document.createElement('a');
+                    card.href = url;
+                    card.target = "_blank";
+                    card.className = "project-card";
+                    card.style.animationDelay = `${delay}s`; // Efeito cascata
+                    
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-icon">${icon}</div>
+                            <span class="card-id">HTML</span>
+                        </div>
+                        <h3 class="card-title">${title}</h3>
+                        <p class="card-desc">${desc}</p>
+                        <div class="card-footer">
+                            Initialize Module <span>→</span>
+                        </div>
                     `;
-                    grid.innerHTML += card;
+                    
+                    grid.appendChild(card);
+                    delay += 0.1; // Aumenta delay para o próximo card
                 });
 
             } catch (error) {
-                grid.innerHTML = `<div class="loading" style="color:red">CONNECTION FAILED: ${error.message}</div>`;
+                grid.innerHTML = `<div class="loading-text" style="color:#ff0040">CONNECTION LOST: ${error.message}</div>`;
             }
         }
 
